@@ -1,0 +1,46 @@
+version: "3.9"
+services:
+  mysql:
+    image: kdustin/mariadb
+    volumes:
+      - /home/kdustin/data/mysql:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    restart: always
+    networks:
+      - inception
+
+  wordpress:
+    image: kdustin/wordpress
+    volumes:
+      - /home/kdustin/data/html:/var/www/html
+    depends_on:
+      - mysql
+    environment:
+      WORDPRESS_DB_HOST: mysql
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      WORDPRESS_DB_NAME: ${MYSQL_DATABASE}
+      WORDPRESS_DB_USER: ${MYSQL_USER}
+      WORDPRESS_DB_PASSWORD: ${MYSQL_PASSWORD}
+      WORDPRESS_TABLE_PREFIX: wp_
+    restart: always
+    networks:
+      - inception
+
+  nginx:
+    image: kdustin/nginx
+    volumes:
+      - /home/kdustin/data/html:/var/www/html
+    ports:
+      - 443:443
+    restart: always
+    networks:
+      - inception
+
+networks:
+  inception:
+    name: inception-network
+    driver: bridge
