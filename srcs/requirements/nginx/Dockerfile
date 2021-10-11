@@ -11,4 +11,4 @@ EXPOSE 80
 
 STOPSIGNAL SIGQUIT
 
-CMD [ "/bin/sh", "run.sh" ]
+ENTRYPOINT [ "/bin/sh", "run.sh" ]

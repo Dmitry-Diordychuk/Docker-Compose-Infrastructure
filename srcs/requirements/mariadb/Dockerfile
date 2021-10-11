@@ -12,4 +12,4 @@ COPY ./conf/db.tar.bz2 /
 
 EXPOSE 3306
 
-CMD ["/bin/sh", "run.sh"]
+ENTRYPOINT ["/bin/sh", "run.sh"]

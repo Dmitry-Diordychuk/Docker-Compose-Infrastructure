@@ -10,53 +10,36 @@
 #                                                                              #
 # **************************************************************************** #
 
-NAME := Inception
+before:
+	docker stop `docker ps -qa` || true
+	docker rm `docker ps -qa` || true
+	docker rmi -f `docker images -qa` || true
+	docker volume rm `docker volume ls -q` || true
+	docker network rm `docker network ls -q` 2>/dev/null
 
-all: $(NAME)
+all: up
 
-$(NAME):
+build:
+	mkdir -p /home/kdustin/data/wordpress
+	mkdir -p /home/kdustin/data/mariadb
 	grep -xF '127.0.0.1 kdustin.42.fr' /etc/hosts || (echo '127.0.0.1 kdustin.42.fr' | sudo tee -a /etc/hosts)
-	userdel mysql || true
-	useradd -u 999 mysql
-	mkdir -p /home/kdustin/data/mysql
-	chown -R mysql:mysql /home/kdustin/data/mysql
-
-	userdel www-data || true
-	useradd -u 82 www-data
-	mkdir -p /home/kdustin/data/html
-	chown -R www-data:www-data /home/kdustin/data/html
-
 	docker build --tag kdustin/mariadb ./srcs/requirements/mariadb/
 	docker build --tag kdustin/wordpress ./srcs/requirements/wordpress/
 	docker build --tag kdustin/nginx ./srcs/requirements/nginx/
 
-	openssl req \
-		-x509 \
-		-nodes \
-		-days 365 \
-		-subj "/C=RU/ST=Moscow/O=42School, Inc./OU=IT/CN=kdustin.42.fr" \
-		-addext "subjectAltName=DNS:kdustin.42.fr" \
-		-newkey rsa:2048 \
-		-keyout /etc/ssl/private/nginx-selfsigned.key \
-		-out /etc/ssl/certs/nginx-selfsigned.crt;
-
-	cp /etc/ssl/private/nginx-selfsigned.key /srcs/requirements/nginx/conf/nginx-selfsigned.key
-	cp /etc/ssl/certs/nginx-selfsigned.crt /srcs/requirements/nginx/conf/nginx-selfsigned.crt
-
-	cd srcs ; docker-compose up -d
-
-clear:
-	cd srcs ; docker-compose down
-	docker rmi kdustin/mariadb
-	docker rmi kdustin/wordpress
-	docker rmi kdustin/nginx
-
-fclear: clear
-	userdel mysql || true
-	userdel www-data || true
-	rm -rf /home/kdustin/data
+destroy:
+	docker rmi kdustin/mariadb || true
+	docker rmi kdustin/wordpress || true
+	docker rmi kdustin/nginx || true
+	docker volume rm srcs_mariadb || true
+	docker volume rm srcs_wordpress || true
+	rm -rf /home/kdustin/data || true
 	grep -vq "127.0.0.1 kdustin.42.fr" /etc/hosts | sudo tee -a /etc/hosts
 
-re: fclear all
+up:
+	cd srcs ; docker-compose up -d
+
+down:
+	cd srcs ; docker-compose down
 
 .PHONY: $(NAME) clear fclear re

@@ -7,7 +7,7 @@ ENV WORDPRESS_DB_USER 4
 ENV WORDPRESS_DB_PASSWORD 5
 ENV WORDPRESS_TABLE_PREFIX 6
 
-RUN apk update && apk add php8 php8-fpm php8-mysqli curl
+RUN apk update && apk --no-cache add php8 php8-fpm php8-mysqli curl
 
 WORKDIR /usr/src
 
@@ -16,4 +16,4 @@ COPY ./tools/run.sh /usr/src
 
 EXPOSE 9000 3306
 
-CMD ["/bin/sh", "run.sh"]
+ENTRYPOINT ["/bin/sh", "run.sh"]

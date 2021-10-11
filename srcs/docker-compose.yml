@@ -3,7 +3,7 @@ services:
   mysql:
     image: kdustin/mariadb
     volumes:
-      - /home/kdustin/data/mysql:/var/lib/mysql
+      - mariadb:/var/lib/mysql
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       MYSQL_DATABASE: ${MYSQL_DATABASE}
@@ -11,12 +11,12 @@ services:
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     restart: always
     networks:
-      - inception
+      - host
 
   wordpress:
     image: kdustin/wordpress
     volumes:
-      - /home/kdustin/data/html:/var/www/html
+      - wordpress:/var/www/html
     depends_on:
       - mysql
     environment:
@@ -28,19 +28,33 @@ services:
       WORDPRESS_TABLE_PREFIX: wp_
     restart: always
     networks:
-      - inception
+      - host
 
   nginx:
     image: kdustin/nginx
     volumes:
-      - /home/kdustin/data/html:/var/www/html
+      - wordpress:/var/www/html
     ports:
       - 443:443
     restart: always
     networks:
-      - inception
+      - host
+
+volumes:
+  mariadb:
+    driver: local
+    driver_opts:
+      type: 'none'
+      device: '/home/kdustin/data/mariadb'
+      o: 'bind'
+  wordpress:
+    driver: local
+    driver_opts:
+      type: 'none'
+      device: '/home/kdustin/data/wordpress'
+      o: 'bind'
 
 networks:
-  inception:
-    name: inception-network
+  host:
+    name: host-network
     driver: bridge
