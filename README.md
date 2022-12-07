@@ -1,2 +1,2 @@
-# Docker-Small-Infrastructure
+# Docker-Compose-Infrastructure
 nginx + wordpress + mariaDB
